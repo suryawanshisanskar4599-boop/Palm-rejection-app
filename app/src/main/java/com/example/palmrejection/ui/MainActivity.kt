@@ -88,17 +88,18 @@ class MainActivity : AppCompatActivity() {
                     val x = event.getX(i)
                     val y = event.getY(i)
                     
-                    when (event.actionMasked) {
-                        MotionEvent.ACTION_DOWN, MotionEvent.ACTION_POINTER_DOWN -> {
-                            if (event.actionIndex == i) {
+                    // A pointer can be moving during ANY event (even POINTER_DOWN/UP for other pointers).
+                    // Always continue the stroke. StrokeManager will start it if it doesn't exist.
+                    binding.drawingView.continueStroke(pointerId, x, y)
+
+                    // Specifically handle start/finish for the exact pointer triggering the event
+                    if (event.actionIndex == i) {
+                        when (event.actionMasked) {
+                            MotionEvent.ACTION_DOWN, MotionEvent.ACTION_POINTER_DOWN -> {
+                                // Stroke is already started/continued by the line above, but we can explicitly start if needed
                                 binding.drawingView.startStroke(pointerId, x, y)
                             }
-                        }
-                        MotionEvent.ACTION_MOVE -> {
-                            binding.drawingView.continueStroke(pointerId, x, y)
-                        }
-                        MotionEvent.ACTION_UP, MotionEvent.ACTION_POINTER_UP, MotionEvent.ACTION_CANCEL -> {
-                            if (event.actionIndex == i) {
+                            MotionEvent.ACTION_UP, MotionEvent.ACTION_POINTER_UP, MotionEvent.ACTION_CANCEL -> {
                                 binding.drawingView.finishStroke(pointerId)
                             }
                         }

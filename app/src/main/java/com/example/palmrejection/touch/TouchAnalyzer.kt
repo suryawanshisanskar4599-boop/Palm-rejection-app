@@ -8,6 +8,7 @@ import com.example.palmrejection.model.TouchData
 class TouchAnalyzer(private val palmDetector: PalmDetector) {
 
     private var velocityTracker: VelocityTracker? = null
+    private val lockedPalmPointers = mutableSetOf<Int>()
 
     fun analyzeEvent(event: MotionEvent): Map<Int, DetectionResult> {
         when (event.actionMasked) {
@@ -15,6 +16,7 @@ class TouchAnalyzer(private val palmDetector: PalmDetector) {
                 velocityTracker?.clear()
                 velocityTracker = velocityTracker ?: VelocityTracker.obtain()
                 velocityTracker?.addMovement(event)
+                lockedPalmPointers.clear()
             }
             MotionEvent.ACTION_MOVE -> {
                 velocityTracker?.addMovement(event)
@@ -22,6 +24,10 @@ class TouchAnalyzer(private val palmDetector: PalmDetector) {
             }
             MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
                 // handle recycle at the end
+            }
+            MotionEvent.ACTION_POINTER_UP -> {
+                val upPointerId = event.getPointerId(event.actionIndex)
+                lockedPalmPointers.remove(upPointerId)
             }
         }
 
@@ -46,12 +52,21 @@ class TouchAnalyzer(private val palmDetector: PalmDetector) {
                 Math.sqrt((vx * vx + vy * vy).toDouble()).toFloat()
             } ?: 0f
 
-            results[pointerId] = palmDetector.classifyTouch(touchData, velocity)
+            if (lockedPalmPointers.contains(pointerId)) {
+                results[pointerId] = DetectionResult.PALM_TOUCH
+            } else {
+                val result = palmDetector.classifyTouch(touchData, velocity)
+                if (result == DetectionResult.PALM_TOUCH) {
+                    lockedPalmPointers.add(pointerId)
+                }
+                results[pointerId] = result
+            }
         }
 
         if (event.actionMasked == MotionEvent.ACTION_UP || event.actionMasked == MotionEvent.ACTION_CANCEL) {
             velocityTracker?.recycle()
             velocityTracker = null
+            lockedPalmPointers.clear()
         }
 
         return results
