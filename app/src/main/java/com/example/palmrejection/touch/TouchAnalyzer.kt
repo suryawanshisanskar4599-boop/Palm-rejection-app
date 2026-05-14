@@ -78,20 +78,19 @@ class TouchAnalyzer(private val palmDetector: PalmDetector) {
             val distanceMoved = Math.sqrt((dx * dx + dy * dy).toDouble()).toFloat()
 
             // If a pointer moves more than 40 pixels, it is actively drawing. Break the palm lock!
-            if (distanceMoved > 40f && lockedPalmPointers.contains(pointerId)) {
+            if (distanceMoved > 40f) {
                 lockedPalmPointers.remove(pointerId)
-            }
-
-            if (lockedPalmPointers.contains(pointerId)) {
-                results[pointerId] = DetectionResult.PALM_TOUCH
+                results[pointerId] = DetectionResult.VALID_DRAW_INPUT
             } else {
-                val result = palmDetector.classifyTouch(touchData, velocity)
-                // Only lock it as a palm if it hasn't moved much.
-                // This prevents fingers that inherit the palm's large size from getting permanently locked!
-                if (result == DetectionResult.PALM_TOUCH && distanceMoved <= 40f) {
-                    lockedPalmPointers.add(pointerId)
+                if (lockedPalmPointers.contains(pointerId)) {
+                    results[pointerId] = DetectionResult.PALM_TOUCH
+                } else {
+                    val result = palmDetector.classifyTouch(touchData, velocity)
+                    if (result == DetectionResult.PALM_TOUCH) {
+                        lockedPalmPointers.add(pointerId)
+                    }
+                    results[pointerId] = result
                 }
-                results[pointerId] = result
             }
         }
 
