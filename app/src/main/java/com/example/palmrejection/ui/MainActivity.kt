@@ -32,7 +32,8 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         val prefs = PreferenceManager.getDefaultSharedPreferences(this)
-        val sensitivity = prefs.getInt("palm_sensitivity", 50) / 100f
+        // Scale 1-100 to realistic touch sizes (0.01 to 0.25)
+        val sensitivity = prefs.getInt("palm_sensitivity", 30) / 400f
         val pressure = prefs.getInt("pressure_threshold", 50) / 100f
         viewModel.updateSettings(sensitivity, pressure)
     }

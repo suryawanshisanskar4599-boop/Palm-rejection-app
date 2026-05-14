@@ -7,8 +7,8 @@ import com.example.palmrejection.utils.Constants
 
 class PalmDetector {
 
-    var palmSizeThreshold: Float = Constants.DEFAULT_PALM_SIZE_THRESHOLD
-    var pressureThreshold: Float = Constants.DEFAULT_PRESSURE_THRESHOLD
+    var palmSizeThreshold: Float = 0.08f // Much smaller default size threshold
+    var pressureThreshold: Float = 0.6f
 
     fun classifyTouch(
         touchData: TouchData,
