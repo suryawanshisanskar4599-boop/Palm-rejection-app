@@ -3,21 +3,29 @@ package com.example.palmrejection.touch
 import android.graphics.Path
 
 class StrokeManager {
-    val currentPath = Path()
+    val activePaths = mutableMapOf<Int, Path>()
     val completedPaths = mutableListOf<Path>()
 
-    fun startStroke(x: Float, y: Float) {
-        currentPath.moveTo(x, y)
+    fun startStroke(pointerId: Int, x: Float, y: Float) {
+        val path = Path()
+        path.moveTo(x, y)
+        activePaths[pointerId] = path
     }
 
-    fun continueStroke(x: Float, y: Float) {
-        currentPath.lineTo(x, y)
+    fun continueStroke(pointerId: Int, x: Float, y: Float) {
+        val path = activePaths[pointerId]
+        if (path != null) {
+            path.lineTo(x, y)
+        } else {
+            startStroke(pointerId, x, y)
+        }
     }
 
-    fun finishStroke() {
-        if (!currentPath.isEmpty) {
-            completedPaths.add(Path(currentPath))
-            currentPath.reset()
+    fun finishStroke(pointerId: Int) {
+        activePaths.remove(pointerId)?.let { path ->
+            if (!path.isEmpty) {
+                completedPaths.add(path)
+            }
         }
     }
 
@@ -29,6 +37,6 @@ class StrokeManager {
 
     fun clear() {
         completedPaths.clear()
-        currentPath.reset()
+        activePaths.clear()
     }
 }

@@ -12,8 +12,7 @@ class PalmDetector {
 
     fun classifyTouch(
         touchData: TouchData,
-        velocity: Float,
-        pointerCount: Int
+        velocity: Float
     ): DetectionResult {
         // Prioritize stylus input
         if (touchData.toolType == MotionEvent.TOOL_TYPE_STYLUS) {
@@ -23,11 +22,6 @@ class PalmDetector {
         val isLargeTouch = touchData.size > palmSizeThreshold
         val isHighPressure = touchData.pressure > pressureThreshold
         val isSlowMovement = velocity < Constants.DEFAULT_VELOCITY_THRESHOLD
-        
-        // Basic heuristic
-        if (pointerCount > Constants.MAX_POINTER_COUNT_FOR_DRAWING) {
-            return DetectionResult.PALM_TOUCH
-        }
 
         if (isLargeTouch && (isHighPressure || isSlowMovement)) {
             return DetectionResult.PALM_TOUCH

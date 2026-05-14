@@ -71,42 +71,48 @@ class MainActivity : AppCompatActivity() {
         }
 
         binding.drawingView.setOnTouchListener { _, event ->
-            val result = viewModel.touchAnalyzer.analyzeEvent(event)
-            viewModel.updateStatus(result)
+            val results = viewModel.touchAnalyzer.analyzeEvent(event)
+            
+            var anyPalmDetected = false
+            var anyDrawingActive = false
 
-            if (result == DetectionResult.VALID_DRAW_INPUT) {
-                when (event.actionMasked) {
-                    MotionEvent.ACTION_DOWN -> {
-                        isDrawing = true
-                        binding.drawingView.startStroke(event.x, event.y)
-                    }
-                    MotionEvent.ACTION_MOVE -> {
-                        if (isDrawing) {
-                            binding.drawingView.continueStroke(event.x, event.y)
-                        } else {
-                            // If we weren't drawing but now valid, we can start
-                            isDrawing = true
-                            binding.drawingView.startStroke(event.x, event.y)
+            for (i in 0 until event.pointerCount) {
+                val pointerId = event.getPointerId(i)
+                val result = results[pointerId]
+                
+                if (result == DetectionResult.PALM_TOUCH) {
+                    anyPalmDetected = true
+                } else if (result == DetectionResult.VALID_DRAW_INPUT) {
+                    anyDrawingActive = true
+                    val x = event.getX(i)
+                    val y = event.getY(i)
+                    
+                    when (event.actionMasked) {
+                        MotionEvent.ACTION_DOWN, MotionEvent.ACTION_POINTER_DOWN -> {
+                            if (event.actionIndex == i) {
+                                binding.drawingView.startStroke(pointerId, x, y)
+                            }
+                        }
+                        MotionEvent.ACTION_MOVE -> {
+                            binding.drawingView.continueStroke(pointerId, x, y)
+                        }
+                        MotionEvent.ACTION_UP, MotionEvent.ACTION_POINTER_UP, MotionEvent.ACTION_CANCEL -> {
+                            if (event.actionIndex == i) {
+                                binding.drawingView.finishStroke(pointerId)
+                            }
                         }
                     }
-                    MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
-                        if (isDrawing) {
-                            binding.drawingView.finishStroke()
-                        }
-                        isDrawing = false
-                        viewModel.updateStatus(DetectionResult.UNKNOWN)
-                    }
-                }
-            } else if (result == DetectionResult.PALM_TOUCH) {
-                // If it was drawing and now palm, we might want to cancel current stroke
-                if (isDrawing) {
-                    isDrawing = false
-                    // Optionally remove the current invalid stroke
-                }
-                if (event.actionMasked == MotionEvent.ACTION_UP || event.actionMasked == MotionEvent.ACTION_CANCEL) {
-                    viewModel.updateStatus(DetectionResult.UNKNOWN)
                 }
             }
+
+            if (anyPalmDetected) {
+                viewModel.updateStatus(DetectionResult.PALM_TOUCH)
+            } else if (anyDrawingActive) {
+                viewModel.updateStatus(DetectionResult.VALID_DRAW_INPUT)
+            } else if (event.actionMasked == MotionEvent.ACTION_UP || event.actionMasked == MotionEvent.ACTION_CANCEL) {
+                viewModel.updateStatus(DetectionResult.UNKNOWN)
+            }
+
             true // Consume the event
         }
     }

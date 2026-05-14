@@ -31,22 +31,24 @@ class DrawingView @JvmOverloads constructor(
         for (path in strokeManager.completedPaths) {
             canvas.drawPath(path, paint)
         }
-        // Draw current path
-        canvas.drawPath(strokeManager.currentPath, paint)
+        // Draw current paths
+        for (path in strokeManager.activePaths.values) {
+            canvas.drawPath(path, paint)
+        }
     }
 
-    fun startStroke(x: Float, y: Float) {
-        strokeManager.startStroke(x, y)
+    fun startStroke(pointerId: Int, x: Float, y: Float) {
+        strokeManager.startStroke(pointerId, x, y)
         invalidate()
     }
 
-    fun continueStroke(x: Float, y: Float) {
-        strokeManager.continueStroke(x, y)
+    fun continueStroke(pointerId: Int, x: Float, y: Float) {
+        strokeManager.continueStroke(pointerId, x, y)
         invalidate()
     }
 
-    fun finishStroke() {
-        strokeManager.finishStroke()
+    fun finishStroke(pointerId: Int) {
+        strokeManager.finishStroke(pointerId)
         invalidate()
     }
 
