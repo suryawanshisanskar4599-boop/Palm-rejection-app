@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
+    <SeekBarPreference
+        app:key="palm_sensitivity"
+        app:title="Palm Sensitivity Threshold"
+        app:summary="Adjust palm size threshold (default 50)"
+        app:min="10"
+        app:defaultValue="50"
+        app:showSegments="true"
+        app:updatesContinuously="true" />
+
+    <SeekBarPreference
+        app:key="pressure_threshold"
+        app:title="Pressure Threshold"
+        app:summary="Adjust pressure threshold for palm detection (default 50)"
+        app:min="10"
+        app:defaultValue="50"
+        app:showSegments="true"
+        app:updatesContinuously="true" />
+</PreferenceScreen>

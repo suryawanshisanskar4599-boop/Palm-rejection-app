@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="palm_rejected_overlay">#4DFF0000</color>
+    <color name="status_green">#00FF00</color>
+    <color name="status_red">#FF0000</color>
+    <color name="background_dark">#121212</color>
+    <color name="text_primary">#FFFFFF</color>
+    <color name="stroke_color">#E0E0E0</color>
+</resources>
